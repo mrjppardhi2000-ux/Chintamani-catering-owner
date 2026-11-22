@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>मालक डॅशबोर्ड | चिंतामणी कॅटरिंग सर्विस</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap');
+    :root {
+      --primary: #8b1e24; --primary-dark: #5d0000; --accent: #D97706;
+      --gold: #F59E0B; --bg: #fffbf5; --card-bg: #FFFFFF;
+      --text: #292524; --muted: #6B7280; --border: #F3E8D8;
+      --success: #15803D; --warning: #EA580C;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 50px; line-height: 1.5; }
+    .sticky-top { position: sticky; top: 0; z-index: 120; }
+    .app-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: #fff; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+    .logo-box { width: 44px; height: 44px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--gold); flex-shrink: 0; overflow: hidden; }
+    .logo-box img, .logo-box svg { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+    .brand-text { min-width: 0; }
+    .brand-text h1 { font-size: 0.94rem; font-weight: 800; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand-text span { font-size: 0.68rem; color: #FDE68A; display: block; }
+    .header-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .add-top-btn { background: var(--gold); color: #292524; border: none; padding: 7px 10px; border-radius: 20px; font-family: inherit; font-size: 0.72rem; font-weight: 800; cursor: pointer; }
+    .sync-btn { background: rgba(255,255,255,0.16); color: #fff; border: 1.5px solid rgba(253,230,138,0.6); padding: 6px 9px; border-radius: 20px; font-size: 0.74rem; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+    .main-nav { background: #fff; border-bottom: 1.5px solid var(--border); display: grid; grid-template-columns: repeat(4, 1fr); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .nav-tab { border: none; background: transparent; padding: 8px 2px; font-family: inherit; font-size: 0.7rem; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.2; text-align: center; }
+    .nav-tab .tab-ico { font-size: 1rem; }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #FFF9F2; }
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+    .container { max-width: 860px; margin: 0 auto; padding: 14px; }
+    .section-title { font-size: 1.02rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .panel-card { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+    @media (min-width: 600px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+    .kpi-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 13px 10px; text-align: center; border-top: 4px solid var(--primary); }
+    .kpi-card.complete { border-top-color: var(--success); }
+    .kpi-card.pending { border-top-color: var(--warning); }
+    .kpi-card.reviews { border-top-color: var(--gold); }
+    .kpi-num { font-size: 1.65rem; font-weight: 800; color: var(--text); line-height: 1.1; margin: 4px 0; }
+    .kpi-label { font-size: 0.74rem; font-weight: 700; color: var(--muted); }
+    .hbar-group { margin-bottom: 12px; }
+    .hbar-label { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; margin-bottom: 4px; }
+    .hbar-track { width: 100%; height: 14px; background: #F3F4F6; border-radius: 999px; overflow: hidden; }
+    .hbar-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease; }
+    .fill-total { background: var(--primary); } .fill-complete { background: var(--success); } .fill-pending { background: var(--warning); }
+    .vchart-scroll { overflow-x: auto; padding-bottom: 4px; }
+    .vchart-wrap { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; min-width: 500px; height: 160px; padding: 20px 6px 6px; border-bottom: 2px solid var(--border); margin-top: 8px; }
+    .vbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+    .vbar-val { font-size: 0.72rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    .vbar-stick { width: 100%; max-width: 28px; min-height: 6px; background: linear-gradient(180deg, var(--gold), var(--primary)); border-radius: 8px 8px 0 0; }
+    .vbar-month { font-size: 0.68rem; font-weight: 700; color: var(--muted); margin-top: 6px; }
+    .search-box { margin-bottom: 10px; }
+    .search-box input { width: 100%; padding: 9px 12px; border-radius: 10px; border: 1.5px solid var(--border); font-family: inherit; font-size: 0.88rem; outline: none; }
+    .filter-pills { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .cat-btn { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: #fff; color: var(--text); font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .cat-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .cat-btn.recycle-btn.active { background: #B91C1C; border-color: #B91C1C; color: #fff; }
+    .recycle-banner { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .order-card { border: 1.5px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: #FFFDF9; }
+    .order-card.deleted-card { border-color: #FECACA; background: #FFF5F5; }
+    .order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .order-name { font-size: 0.95rem; font-weight: 800; }
+    .status-badge { font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+    .badge-pending { background: #FFEDD5; color: #C2410C; border: 1px solid #FED7AA; }
+    .badge-confirmed { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+    .badge-completed { background: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .badge-cancelled { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .badge-deleted { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .order-meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
+    .order-items-box { font-size: 0.78rem; background: #fff; border: 1px dashed var(--border); padding: 7px 10px; border-radius: 8px; margin-bottom: 10px; }
+    .order-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-sm { padding: 7px 11px; border-radius: 9px; font-family: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-edit { background: #2563EB; color: #fff; }
+    .btn-outline { background: #fff; color: var(--text); border: 1.5px solid var(--border); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-wa { background: #16A34A; color: #fff; }
+    .btn-danger { background: #FEE2E2; color: #DC2626; }
+    .btn-danger-solid { background: #DC2626; color: #fff; }
+    .logo-settings { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+    .logo-preview-big { width: 68px; height: 68px; border-radius: 50%; border: 2.5px solid var(--gold); background: #000; overflow: hidden; flex-shrink: 0; }
+    .logo-preview-big img, .logo-preview-big svg { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+    .qr-preview-box { width: 120px; height: 120px; border-radius: 14px; border: 2px dashed var(--border); background: #FFFBF5; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; text-align: center; font-size: 0.72rem; color: var(--muted); padding: 6px; }
+    .qr-preview-box img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .review-card { border-bottom: 1px dashed var(--border); padding: 10px 0; }
+    .review-card:last-child { border-bottom: none; }
+    .review-head { display: flex; justify-content: space-between; align-items: center; }
+    .review-stars { color: var(--gold); font-size: 0.9rem; }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 3px; color: var(--text); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 11px; border-radius: 10px; border: 1.5px solid var(--border); font-family: inherit; font-size: 0.86rem; background: #fff; }
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    @media (min-width: 550px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    .pkg-edit-box { border: 1.5px solid #FDE68A; background: #FFFDF7; border-radius: 12px; padding: 11px; margin-bottom: 10px; }
+    .pkg-items-editor { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 8px; margin-top: 8px; }
+    .menu-edit-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 7px; background: #FFFDF9; }
+    .sub-switch { display: flex; gap: 8px; margin-bottom: 14px; }
+    .sub-switch button { flex: 1; padding: 9px; border-radius: 10px; font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: 1.5px solid var(--border); background: #fff; }
+    .sub-switch button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .preview-shell { border: 2px solid var(--primary); border-radius: 18px; overflow: hidden; background: var(--bg); }
+    .preview-header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .preview-offer { background: linear-gradient(90deg, #F59E0B, #D97706); color: #292524; text-align: center; font-size: 0.76rem; font-weight: 800; padding: 5px 10px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; display: none; align-items: flex-end; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal-sheet { background: #fff; width: 100%; max-width: 540px; border-radius: 20px 20px 0 0; padding: 20px 16px 24px; max-height: 92vh; overflow-y: auto; }
+    @media (min-width: 600px) { .modal-overlay { align-items: center; } .modal-sheet { border-radius: 20px; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .close-btn { background: #F3F4F6; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
+    .edit-menu-checklist { max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: #FFFBF5; margin-bottom: 10px; }
+    .edit-menu-check-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 8px; background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 5px; }
+    .edit-menu-check-row:last-child { margin-bottom: 0; }
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+    .selected-chip { background: #FEF3C7; border: 1px solid #FDE68A; color: #92400E; font-size: 0.74rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; }
+    .selected-chip button { background: none; border: none; color: #DC2626; font-weight: 800; cursor: pointer; font-size: 0.8rem; }
+    .sync-badge { display: inline-flex; align-items: center; gap: 5px; background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; margin-bottom: 12px; }
+    .toast { position: fixed; top: 125px; left: 50%; transform: translateX(-50%); background: #1F2937; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 0.84rem; font-weight: 700; z-index: 400; display: none; text-align: center; max-width: 90%; }
+    .toast.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toastMsg"></div>
+
+  <div class="sticky-top">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-box" id="headerLogoBox"></div>
+        <div class="brand-text">
+          <h1 id="ownerHdrTitle">चिंतामणी कॅटरिंग (मालक)</h1>
+          <span id="ownerHdrSub">Admin • गौरव मिश्रा</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" target="_blank" class="sync-btn" title="ग्राहक साईट उघडा">🌐 साईट</a>
+        <button class="sync-btn" onclick="manualSync()" title="सिंक करा">🔄</button>
+        <button class="add-top-btn" onclick="openOrderModal()">+ बुकिंग</button>
+      </div>
+    </header>
+
+    <nav class="main-nav">
+      <button class="nav-tab active" data-tab="overview" onclick="switchTab('overview')"><span class="tab-ico">📊</span><span>डॅशबोर्ड</span></button>
+      <button class="nav-tab" data-tab="orders" onclick="switchTab('orders')"><span class="tab-ico">📋</span><span>बुकिंग्स</span></button>
+      <button class="nav-tab" data-tab="customer" onclick="switchTab('customer')"><span class="tab-ico">✏️</span><span>ग्राहक साईट</span></button>
+      <button class="nav-tab" data-tab="reviews" onclick="switchTab('reviews')"><span class="tab-ico">⭐</span><span>रिव्ह्यू</span></button>
+    </nav>
+  </div>
+
+  <!-- TAB 1: OVERVIEW -->
+  <section id="tab-overview" class="tab-section active">
+    <main class="container">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">📦 Total Orders</div><div class="kpi-num" id="statTotal">0</div><div class="kpi-label">एकूण ऑर्डर्स</div></div>
+        <div class="kpi-card complete"><div class="kpi-label">🎉 Complete Order</div><div class="kpi-num" id="statComplete">0</div><div class="kpi-label">पूर्ण ऑर्डर्स</div></div>
+        <div class="kpi-card pending"><div class="kpi-label">⏳ Active / Pending</div><div class="kpi-num" id="statPending">0</div><div class="kpi-label">प्रलंबित व कन्फर्म</div></div>
+        <div class="kpi-card reviews"><div class="kpi-label">⭐ Reviews</div><div class="kpi-num" id="statReviews">0</div><div class="kpi-label">ग्राहक रिव्ह्यू</div></div>
+      </div>
+
+      <div class="panel-card">
+        <div class="section-title">📊 ऑर्डर स्टेटस ग्राफ (Graph Bar)</div>
+        <div class="hbar-group"><div class="hbar-label"><span>एकूण ऑर्डर्स (Total)</span><span id="lblBarTotal">0 (100%)</span></div><div class="hbar-track"><div class="hbar-fill fill-total" id="barTotal" style="width:0%"></div></div></div>
+        <div class="hbar-group"><div class="hbar-label"><span>पूर्ण ऑर्डर्स (Complete)</span><span id="lblBarComplete">0 (0%)</span></div><div class="hbar-track"><div class="hbar-fill fill-complete" id="barComplete" style="width:0%"></div></div></div>
+        <div class="hbar-group" style="margin-bottom:0;"><div class="hbar-label"><span>प्रलंबित / कन्फर्म ऑर्डर्स</span><span id="lblBarPending">0 (0%)</span></div><div class="hbar-track"><div class="hbar-fill fill-pending" id="barPending" style="width:0%"></div></div></div>
+      </div>
+
+      <div class="panel-card">
+        <div class="section-title">📈 मासिक ऑर्डर्स बार ग्राफ (१२ महिने)</div>
+        <div class="vchart-scroll"><div class="vchart-wrap" id="monthlyChart"></div></div>
+      </div>
+
+      <div class="panel-card">
+        <div class="section-title"><span>⏳ येणाऱ्या Pending / Confirmed ऑर्डर्स</span><button class="btn-sm btn-outline" onclick="switchTab('orders')">सर्व पहा →</button></div>
+        <div id="pendingPreviewList"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- TAB 2: ORDERS & RECYCLE BIN -->
+  <section id="tab-orders" class="tab-section">
+    <main class="container">
+      <div class="panel-card">
+        <div class="section-title"><span>📋 सर्व ग्राहक बुकिंग यादी</span><button class="btn-sm btn-primary" onclick="openOrderModal()">+ नवीन बुकिंग</button></div>
+        <div class="search-box"><input type="text" id="orderSearchInput" placeholder="ग्राहकाचे नाव, मोबाईल किंवा ठिकाण शोधा..." oninput="renderOrdersList()" /></div>
+        <div class="filter-pills">
+          <button class="cat-btn active" onclick="setOrderFilter('all', this)">सर्व</button>
+          <button class="cat-btn" onclick="setOrderFilter('pending', this)">⏳ प्रतीक्षेत</button>
+          <button class="cat-btn" onclick="setOrderFilter('confirmed', this)">✅ कन्फर्म</button>
+          <button class="cat-btn" onclick="setOrderFilter('completed', this)">🎉 पूर्ण</button>
+          <button class="cat-btn" onclick="setOrderFilter('cancelled', this)">❌ रद्द</button>
+          <button class="cat-btn recycle-btn" onclick="setOrderFilter('recycle', this)">🗑️ रिसायकल बिन (<span id="recycleCountBadge">0</span>)</button>
+        </div>
+        <div id="recycleBannerWrap"></div>
+        <div id="ordersList"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- TAB 3: CUSTOMER SITE SETTINGS -->
+  <section id="tab-customer" class="tab-section">
+    <main class="container">
+      <div class="sync-badge">🟢 लाईव्ह सिंक चालू — येथील सर्व बदल ग्राहक साईटवर (index.html) त्वरित अपडेट होतात</div>
+
+      <div class="sub-switch">
+        <button id="btnCustEdit" class="active" onclick="setCustSubTab('edit')">⚙️ ग्राहक साईट एडिट करा</button>
+        <button id="btnCustPrev" onclick="setCustSubTab('preview')">👁️ ग्राहक साईट प्रिव्ह्यू</button>
+      </div>
+
+      <div id="custEditView">
+        <div class="panel-card">
+          <div class="section-title">🏪 नाव, नंबर, पत्ता व लोगो बदला</div>
+          <div class="logo-settings">
+            <div class="logo-preview-big" id="dashLogoPreview"></div>
+            <div class="logo-actions">
+              <input type="file" id="logoFileInput" accept="image/*" style="display:none;" onchange="handleLogoUpload(event)" />
+              <button class="btn-sm btn-primary" onclick="document.getElementById('logoFileInput').click()">📁 लोगो बदला</button>
+              <button class="btn-sm btn-outline" onclick="resetLogo()">↺ डिफॉल्ट लोगो</button>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label>कॅटरिंगचे नाव</label><input type="text" id="setBizName" /></div>
+            <div class="form-group"><label>मालकाचे नाव</label><input type="text" id="setOwnerName" /></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label>मोबाईल / WhatsApp नंबर (१० अंकी)</label><input type="tel" id="setPhone" maxlength="10" inputmode="numeric" /></div>
+            <div class="form-group"><label>पत्ता</label><input type="text" id="setAddress" /></div>
+          </div>
+          <button class="btn-sm btn-success" style="width:100%; justify-content:center; padding:10px;" onclick="saveGeneralSettings()">💾 नाव, नंबर व पत्ता सेव्ह करा</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="section-title">📱 ग्राहक साईटसाठी पेमेंट QR कोड</div>
+          <div class="logo-settings">
+            <div class="qr-preview-box" id="dashQrPreview">QR कोड अपलोड केलेला नाही</div>
+            <div style="flex:1; min-width:180px;">
+              <div class="form-group"><label>QR कोडचे शीर्षक / सूचना</label><input type="text" id="setQrTitle" placeholder="उदा. 📲 ऑनलाइन पेमेंटसाठी QR कोड स्कॅन करा" /></div>
+              <div class="logo-actions">
+                <input type="file" id="qrFileInput" accept="image/*" style="display:none;" onchange="handleQrUpload(event)" />
+                <button class="btn-sm btn-primary" onclick="document.getElementById('qrFileInput').click()">📁 QR कोड अपलोड करा</button>
+                <button class="btn-sm btn-danger" onclick="removeQrCode()">🗑️ QR काढा</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn-sm btn-success" style="width:100%; justify-content:center; padding:10px;" onclick="saveQrTitle()">💾 QR कोड माहिती सेव्ह करा</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="section-title">
+            <span>💰 पॅकेजेस, दर व पॅकेजमधील पदार्थ एडिट करा</span>
+            <button class="btn-sm btn-primary" onclick="addNewPackage()">+ नवीन पॅकेज</button>
+          </div>
+          <p style="font-size:0.78rem; color:var(--muted); margin-bottom:10px;">
+            प्रत्येक पॅकेजमधील पदार्थ येथे जोडा किंवा काढा. ग्राहक साईटवर पॅकेज निवडल्यावर हेच पदार्थ आपोआप सिलेक्ट होतील.
+          </p>
+          <div id="pkgEditorsWrap"></div>
+          <button class="btn-sm btn-success" style="width:100%; justify-content:center; padding:10px;" onclick="savePackages()">💾 सर्व पॅकेजेस व दर सेव्ह करा</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="section-title">
+            <span>🍽️ संपूर्ण मेनू व्यवस्थापन (<span id="menuTotalBadge">209</span> पदार्थ)</span>
+            <button class="btn-sm btn-outline" onclick="resetMenuDefault()">↺ डिफॉल्ट मेनू</button>
+          </div>
+          <div class="pkg-edit-box" style="border-color:#BBF7D0; background:#F0FDF4;">
+            <strong style="font-size:0.84rem; color:var(--success); display:block; margin-bottom:6px;">+ नवीन पदार्थ मेनूमध्ये जोडा</strong>
+            <div class="grid-2">
+              <div class="form-group"><label>पदार्थाचे नाव *</label><input type="text" id="newDishName" placeholder="उदा. पनीर बटर मसाला" /></div>
+              <div class="form-group"><label>कॅटेगरी निवडा</label><select id="newDishCat"></select></div>
+            </div>
+            <div class="form-group"><label>माहिती किंवा उप-प्रकार (उदा. स्पेशल भाजी / स्टार्टर)</label><input type="text" id="newDishDesc" placeholder="उदा. स्पेशल भाजी" /></div>
+            <button class="btn-sm btn-primary" style="width:100%; justify-content:center; padding:9px;" onclick="addNewDish()">+ मेनूमध्ये जोडा</button>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:10px;">
+            <input type="text" id="menuEditSearch" placeholder="🔍 पदार्थ शोधा..." oninput="renderMenuEditor()" style="padding:8px 11px; border-radius:10px; border:1.5px solid var(--border); font-family:inherit; font-size:0.85rem;" />
+            <select id="menuEditCatFilter" onchange="renderMenuEditor()" style="padding:8px 11px; border-radius:10px; border:1.5px solid var(--border); font-family:inherit; font-size:0.85rem; background:#fff;"></select>
+          </div>
+          <div id="menuEditorList" style="max-height:380px; overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <div id="custPreviewView" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px; flex-wrap:wrap;">
+          <span style="font-size:0.82rem; color:var(--muted); font-weight:700;">👇 ग्राहकांना साईट अशी दिसेल:</span>
+          <a href="index.html" target="_blank" class="btn-sm btn-primary">↗️ ग्राहक साईट उघडा</a>
+        </div>
+        <div class="preview-shell" id="liveCustomerPreview"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- TAB 4: REVIEWS -->
+  <section id="tab-reviews" class="tab-section">
+    <main class="container">
+      <div class="panel-card">
+        <div class="section-title"><span>⭐ ग्राहक रिव्ह्यू व्यवस्थापन</span><span style="font-size:0.82rem; color:var(--muted);" id="ownerRevSummary"></span></div>
+        <div id="ownerReviewsList"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ADD NEW ORDER MODAL -->
+  <div class="modal-overlay" id="ownerModal">
+    <div class="modal-sheet">
+      <div class="modal-header"><h3>📝 नवीन ग्राहक बुकिंग नोंदवा</h3><button class="close-btn" onclick="closeOrderModal()">✕</button></div>
+      <div class="form-group"><label>ग्राहकाचे नाव *</label><input type="text" id="bName" placeholder="उदा. अमोल गावंडे" /></div>
+      <div class="form-group"><label>मोबाईल नंबर (१० अंकी) *</label><input type="tel" id="bPhone" maxlength="10" inputmode="numeric" placeholder="उदा. 9876543210" /></div>
+      <div class="form-group"><label>पॅकेज निवडा (पॅकेज निवडल्यास त्याचे पदार्थ आपोआप येतील)</label><select id="bPkg" onchange="handleNewBookingPkgChange()"></select></div>
+      <div class="form-group"><label>ठिकाण</label><input type="text" id="bPlace" placeholder="कार्यक्रमाचे ठिकाण" /></div>
+      <div class="form-group">
+        <label>कार्यक्रमाची तारीख व महिना</label>
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:8px;">
+          <input type="text" id="bDate" placeholder="उदा. २५ नोव्हें २०२६" />
+          <select id="bMonth">
+            <option value="जाने">जाने</option><option value="फेब्रु">फेब्रु</option><option value="मार्च">मार्च</option>
+            <option value="एप्रि">एप्रि</option><option value="मे">मे</option><option value="जून">जून</option>
+            <option value="जुलै">जुलै</option><option value="ऑग">ऑगस्ट</option><option value="सप्टें">सप्टें</option>
+            <option value="ऑक्टो">ऑक्टो</option><option value="नोव्हें">नोव्हें</option><option value="डिसें">डिसें</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>लोकांची संख्या</label><input type="text" id="bGuests" placeholder="उदा. २०० लोक" /></div>
+      <div class="form-group"><label>मेनू / निवडलेले पदार्थ (स्वल्पविराम देऊन लिहा)</label><textarea id="bItems" rows="3" placeholder="उदा. पनीर टिक्का, शाही पनीर, जिरा राईस"></textarea></div>
+      <div class="form-group"><label>ऑर्डर स्टेटस</label><select id="bStatus"><option value="pending">⏳ प्रतीक्षेत (Pending)</option><option value="confirmed">✅ कन्फर्म (Confirmed)</option><option value="completed">🎉 पूर्ण (Complete)</option><option value="cancelled">❌ रद्द (Cancelled)</option></select></div>
+      <div class="form-group"><label>विशेष सूचना</label><input type="text" id="bFeedback" placeholder="काही टीप असल्यास लिहा" /></div>
+      <button class="btn-sm btn-primary" style="width:100%; padding:12px; font-size:0.92rem; justify-content:center;" onclick="saveOwnerBooking()">💾 बुकिंग सेव्ह करा</button>
+    </div>
+  </div>
+
+  <!-- OWNER EDIT EXISTING ORDER MODAL -->
+  <div class="modal-overlay" id="ownerEditOrderModal">
+    <div class="modal-sheet">
+      <div class="modal-header"><h3>✏️ ग्राहकाची ऑर्डर एडिट करा</h3><button class="close-btn" onclick="closeOwnerEditOrderModal()">✕</button></div>
+      <input type="hidden" id="eoId" />
+      <div class="grid-2">
+        <div class="form-group"><label>ग्राहकाचे नाव *</label><input type="text" id="eoName" /></div>
+        <div class="form-group"><label>मोबाईल नंबर (१० अंकी) *</label><input type="tel" id="eoPhone" maxlength="10" inputmode="numeric" /></div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label>ठिकाण / लोकेशन *</label><input type="text" id="eoPlace" /></div>
+        <div class="form-group"><label>लोकांची संख्या *</label><input type="text" id="eoGuests" /></div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label>कार्यक्रमाची तारीख *</label><input type="text" id="eoDate" /></div>
+        <div class="form-group">
+          <label>महिना (ग्राफसाठी)</label>
+          <select id="eoMonth">
+            <option value="जाने">जाने</option><option value="फेब्रु">फेब्रु</option><option value="मार्च">मार्च</option>
+            <option value="एप्रि">एप्रि</option><option value="मे">मे</option><option value="जून">जून</option>
+            <option value="जुलै">जुलै</option><option value="ऑग">ऑगस्ट</option><option value="सप्टें">सप्टें</option>
+            <option value="ऑक्टो">ऑक्टो</option><option value="नोव्हें">नोव्हें</option><option value="डिसें">डिसें</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label>पॅकेज</label><select id="eoPkg"></select></div>
+        <div class="form-group">
+          <label>ऑर्डर स्टेटस</label>
+          <select id="eoStatus">
+            <option value="pending">⏳ प्रतीक्षेत (Pending)</option><option value="confirmed">✅ कन्फर्म (Confirmed)</option>
+            <option value="completed">🎉 पूर्ण (Complete)</option><option value="cancelled">❌ रद्द (Cancelled)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>विशेष सूचना</label><input type="text" id="eoFeedback" /></div>
+
+      <div class="form-group" style="margin-bottom:6px;">
+        <label>🍽️ निवडलेले पदार्थ (<span id="eoItemsCount">0</span>)</label>
+        <div class="chip-wrap" id="eoSelectedChips"></div>
+      </div>
+
+      <div style="display:flex; gap:6px; margin-bottom:8px;">
+        <input type="text" id="eoCustomDishInput" placeholder="किंवा नवीन पदार्थ टाइप करून जोडा..." style="flex:1; padding:7px 10px; border-radius:9px; border:1.5px solid var(--border); font-family:inherit; font-size:0.82rem;" />
+        <button class="btn-sm btn-primary" type="button" onclick="addCustomDishToOwnerEdit()">+ जोडा</button>
+      </div>
+
+      <div class="search-box" style="margin-bottom:8px;">
+        <input type="text" id="eoMenuSearch" placeholder="🔍 मेनू यादीतून पदार्थ शोधा..." oninput="renderOwnerEditMenuList()" />
+      </div>
+      <div class="edit-menu-checklist" id="eoMenuChecklist"></div>
+
+      <button class="btn-sm btn-success" style="width:100%; padding:12px; font-size:0.92rem; justify-content:center;" onclick="saveOwnerEditedOrder()">💾 ऑर्डरचे सर्व बदल सेव्ह करा</button>
+    </div>
+  </div>
+
+  <!-- DISH EDIT MODAL -->
+  <div class="modal-overlay" id="dishEditModal">
+    <div class="modal-sheet">
+      <div class="modal-header"><h3>✏️ पदार्थ एडिट करा</h3><button class="close-btn" onclick="closeDishModal()">✕</button></div>
+      <input type="hidden" id="editDishId" />
+      <div class="form-group"><label>पदार्थाचे नाव *</label><input type="text" id="editDishName" /></div>
+      <div class="form-group"><label>कॅटेगरी</label><select id="editDishCat"></select></div>
+      <div class="form-group"><label>माहिती किंवा उप-प्रकार</label><input type="text" id="editDishDesc" /></div>
+      <button class="btn-sm btn-success" style="width:100%; padding:12px; font-size:0.92rem; justify-content:center;" onclick="saveEditedDish()">💾 बदल सेव्ह करा</button>
+    </div>
+  </div>
+
+  <script>
+    const FIREBASE_DB_URL = "https://chintamani-catering-default-rtdb.firebaseio.com";
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const MARATHI_MONTHS = ["जाने", "फेब्रु", "मार्च", "एप्रि", "मे", "जून", "जुलै", "ऑग", "सप्टें", "ऑक्टो", "नोव्हें", "डिसें"];
+
+    const memoryStore = {};
+    function saveStore(key, val) {
+      const str = JSON.stringify(val);
+      memoryStore[key] = str;
+      try { localStorage.setItem(key, str); } catch (e) {}
+    }
+    function loadStore(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw !== null) return JSON.parse(raw);
+      } catch (e) {}
+      if (memoryStore[key]) return JSON.parse(memoryStore[key]);
+      return fallback;
+    }
+    function escHtml(str) {
+      return String(str == null ? "" : str)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    function getCleanPhone(p) {
+      const digits = String(p || "").replace(/\D/g, "");
+      if (digits.length >= 10) return digits.slice(-10);
+      return digits;
+    }
+
+    function detectMonthFromOrder(o) {
+      if (o && MARATHI_MONTHS.includes(o.monthLabel)) return o.monthLabel;
+      const dateStr = String((o && (o.date || o.eventDate || o.createdAt)) || "");
+      const monthMap = [
+        ["जाने", ["जाने", "jan"]],
+        ["फेब्रु", ["फेब्रु", "feb"]],
+        ["मार्च", ["मार्च", "mar"]],
+        ["एप्रि", ["एप्रि", "apr"]],
+        ["मे", ["मे", "may"]],
+        ["जून", ["जून", "jun"]],
+        ["जुलै", ["जुलै", "jul"]],
+        ["ऑग", ["ऑग", "aug"]],
+        ["सप्टें", ["सप्टें", "sep"]],
+        ["ऑक्टो", ["ऑक्टो", "oct"]],
+        ["नोव्हें", ["नोव्हें", "nov"]],
+        ["डिसें", ["डिसें", "dec"]]
+      ];
+      const lower = dateStr.toLowerCase();
+      for (const [mLabel, keys] of monthMap) {
+        if (keys.some(k => lower.includes(k))) return mLabel;
+      }
+      const isoMatch = dateStr.match(/\b20\d\d[-/](\d{1,2})[-/]\d{1,2}\b/);
+      if (isoMatch) {
+        const mIdx = Number(isoMatch[1]) - 1;
+        if (mIdx >= 0 && mIdx < 12) return MARATHI_MONTHS[mIdx];
+      }
+      return MARATHI_MONTHS[new Date().getMonth()];
+    }
+
+    function normalizeOrderItems(rawItems) {
+      if (Array.isArray(rawItems)) {
+        return rawItems.map(x => typeof x === "string" ? x.trim() : String((x && (x.name || x.title)) || "").trim()).filter(Boolean);
+      }
+      if (typeof rawItems === "string") {
+        return rawItems.split(",").map(s => s.trim()).filter(Boolean);
+      }
+      return [];
+    }
+
+    function isValidOrder(o) {
+      if (!o || typeof o !== "object") return false;
+      const cleanName = String(o.name || o.customerName || o.fullName || "").trim();
+      if (!cleanName || cleanName.toLowerCase() === "unknown") return false;
+      const hasAnyInfo = cleanName || String(o.phone || o.mobile || "").trim() || String(o.date || "").trim() || String(o.place || o.location || "").trim();
+      return Boolean(hasAnyInfo);
+    }
+
+    function sanitizeOrdersList(list) {
+      if (!Array.isArray(list)) return [];
+      const seen = new Set();
+      const out = [];
+      list.forEach((o, index) => {
+        if (!isValidOrder(o)) return;
+        const cleanName = String(o.name || o.customerName || o.fullName || "").trim();
+        const rawDigits = String(o.phone || o.mobile || o.contact || "").replace(/\D/g, "");
+        const cleanPhone = rawDigits.length >= 10 ? rawDigits.slice(-10) : rawDigits;
+        const numericId = Number(o.id || o.orderId || o.timestamp);
+        const finalId = Number.isFinite(numericId) && numericId > 0 ? numericId : (Date.now() - index);
+        const key = `${finalId}__${cleanName}__${cleanPhone}__${String(o.date || "")}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        let st = String(o.status || o.orderStatus || "pending").toLowerCase();
+        if (st === "complete" || st === "done") st = "completed";
+        if (st === "confirm") st = "confirmed";
+        if (st === "cancel" || st === "cancelled" || st === "canceled" || st === "rejected") st = "cancelled";
+        if (!["pending", "confirmed", "completed", "cancelled"].includes(st)) st = "pending";
+
+        out.push({
+          ...o,
+          id: finalId,
+          name: cleanName,
+          phone: cleanPhone || "-",
+          pkg: o.pkg || o.packageName || o.package || "कस्टम मेनू",
+          place: o.place || o.location || o.address || "सांगितलेले नाही",
+          date: o.date || o.eventDate || "सांगितलेली नाही",
+          monthLabel: detectMonthFromOrder(o),
+          guests: o.guests || o.guestCount || o.plates || "-",
+          items: normalizeOrderItems(o.items || o.menuItems || o.dishes || o.selectedItems),
+          status: st,
+          feedback: o.feedback || o.note || o.remark || "-"
+        });
+      });
+      return out.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+    }
+
+    let syncChannel = null;
+    try { syncChannel = new BroadcastChannel("chintamani_sync"); } catch (e) {}
+    let lastKnownSyncTs = "";
+    try { lastKnownSyncTs = localStorage.getItem("chintamani_sync_ts") || ""; } catch (e) {}
+
+    function notifyCustomerSite(type = "settings_updated") {
+      const ts = String(Date.now());
+      try { localStorage.setItem("chintamani_sync_ts", ts); } catch (e) {}
+      lastKnownSyncTs = ts;
+      if (syncChannel) syncChannel.postMessage({ type, ts, source: "owner" });
+    }
+
+    async function pushCloud(path, method, payload) {
+      if (!FIREBASE_DB_URL) return;
+      try {
+        const url = FIREBASE_DB_URL.replace(/\/$/, "") + path;
+        const opts = { method };
+        if (payload !== undefined) {
+          opts.headers = { "Content-Type": "application/json" };
+          opts.body = JSON.stringify(payload);
+        }
+        await fetch(url, opts);
+      } catch (e) {}
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toastMsg");
+      el.textContent = msg; el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2600);
+    }
+
+    const DEFAULT_LOGO_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#000"/><path d="M54 6 C57 10,57 13,54 15 C51 13,51 10,54 6 Z" fill="#F97300"/><path d="M48 14 Q54 17.5 64 14 C58 19,56 23,58 26 C55 25,53 24,52 24 C44 37,30 50,27 63 C25 77,36 88,52 88 C62 88,66 82,62 77 C58 73,49 74,46 71 C46 69,50 68,56 68 C68 68,75 74,74 83 C72 91,63 95,52 95 C32 95,18 82,20 66 L15 63 L21 59 C27 45,42 33,50 22 C50 19,49 16,48 14 Z" fill="#F97300"/><path d="M40 46 C43 42,46 39,49 36 L54 43 C51 45,49 47,52 51 C55 55,61 52,63 45 C64 39,63 34,61 30 C67 36,70 48,65 58 C60 66,51 64,45 55 L40 46 Z" fill="#F97300"/><path d="M61 21 C65 25,66 29,62 33 C59 36,58 38,57 40 C54 37,52 33,55 29 C58 26,60 23,61 21 Z" fill="#FF1E00"/></svg>`;
+
+    const CAT_LIST = [
+      { id: "starters", label: "स्टार्टर्स" }, { id: "nashta", label: "नाश्ता" },
+      { id: "poli", label: "पोळी" }, { id: "rice", label: "चावल व बिर्याणी" },
+      { id: "bhaji", label: "भाजी" }, { id: "Dal", label: "दाल" },
+      { id: "kadi", label: "कढी" }, { id: "namkin", label: "नमकीन पदार्थ" },
+      { id: "sweets", label: "गोड पदार्थ" }, { id: "chat", label: "चाट" },
+      { id: "chaines", label: "चायनीज" }
+    ];
+
+    const DEFAULT_SETTINGS = {
+      bizName: "चिंतामणी कॅटरिंग सर्विस",
+      ownerName: "गौरव मिश्रा",
+      phone: "9130273141",
+      address: "गजानन नगरी, बाळकृष्ण ले आउट, उमरेड - 441203",
+      specialOffer: "",
+      qrTitle: "📲 ऑनलाइन पेमेंटसाठी QR कोड स्कॅन करा",
+      heroBadge: "✨ प्रत्येक मंगल प्रसंगासाठी विश्वासार्ह सेवा",
+      heroTitle: "चविष्ट मेजवानीची अविस्मरणीय कॅटरिंग!",
+      heroDesc: "लग्न समारंभ, साखरपुडा, बारसे, वास्तुशांत आणि कॉर्पोरेट इव्हेंट्ससाठी खास व्हेज, नॉन-व्हेज व पारंपारिक महाराष्ट्रीयन कॅटरिंग सर्विस.",
+      packages: [
+        {
+          tag: "सिल्व्हर पॅकेज",
+          title: "पारंपारिक मेनू",
+          price: "₹ १००",
+          unit: "/ प्लेटपासून",
+          desc: "साध्या व मंगल कार्यक्रमासाठी उत्तम पर्याय",
+          featured: false,
+          items: ["साधी पोळी", "जिरा राईस", "आलु + मटर", "साधी दाल", "गुलाबजामुन"]
+        },
+        {
+          tag: "गोल्ड पॅकेज",
+          title: "शाही मेनू",
+          price: "₹ १६९",
+          unit: "/ प्लेटपासून",
+          desc: "स्पेशल स्वीट व स्टार्टरसह परिपूर्ण मेजवानी",
+          featured: false,
+          items: ["पनीर टिक्का", "लच्छा पराठा", "वेज पुलाव", "मटर पनिर", "दाल तडका", "रसमलाई"]
+        },
+        {
+          tag: "प्रीमियम पॅकेज",
+          title: "रॉयल बुफे मेनू",
+          price: "₹ ४९९",
+          unit: "/ प्लेटपासून",
+          desc: "भव्य लग्न समारंभ व रिसेप्शनसाठी खास बुफे",
+          featured: true,
+          items: ["हराभरा कबाब", "चीजबॉल", "तन्दुरी रोटी", "वेज बिर्याणी", "कढई पनीर", "मलाई कोप्ता", "दाल मखनी", "काजु कतली", "रबडी जलेबी", "आईसक्रिम"]
+        }
+      ]
+    };
+
+    const RAW_MENU_GROUPS = [
+      ["starters", "स्टार्टर", ["ड्राय मंच्युरीयन","पनीर टिक्का","चिली पनीर","चीजबॉल","पनीर पकोडे","क्रिस्पी वेज","हराभरा कबाब","गोल्ड कॉइन","मेथी कॉर्न टिक्का","मिनी कटलेट","मिनी समोसा","मिनी आलुबोंडा","मिनी कचोरी","टोमॅटो सूप","अमेरिकन चॉप्सी","चहा","कॉफी","आमपन्ना","कोल्ड्रिंक्स"]],
+      ["nashta", "नाश्ता", ["आलु पोहा","उपमा","इडली सांबार","सांबार वडा","ढोकळा","कचोरी","समोसा","आलुबोंडा","मॅगी","पास्ता"]],
+      ["poli", "पोळी", ["फुलका पोळी","साधी पोळी","मसाला पुरी","साधी पुरी","मेथी पुरी","पालक पुरी","पराठा साधा","लच्छा पराठा","तन्दुरी रोटी","रुमाली रोटी","मेरठ पराठा","खास्ता पुरी (खारी)"]],
+      ["rice", "भात/चावल", ["प्लेन राईस","जिरा राईस","मटर राईस","वेज पुलाव","वेज बिर्याणी","फ्राईड राईस","तवा पुलाव","आलु भात","पालक ग्रीन राईस","गट्टा पुलाव","मसाला चावल","कश्मिरी पुलाव"]],
+      ["bhaji", "भाजी", ["मसाला बैगन","रसा पाटोडी","आलु + बैंगन","मटर पनिर","आलु + कोबी + मटर","पालक पनीर","मसाला पनीर","लच्छा पनीर","कढई पनीर","पनीर टिक्का मसाला","पनीर भुर्जी","शाही पनीर","छोला मसाला","पालक छोला","मटर कॉर्न पनीर","पालक कॉर्न पनीर","कॉर्न पालक आलु","प्लेन खसखस","खाकस पनीर","तवा वेज","मलाई कोप्ता","लवकी कोप्ता","बेसन गट्टा","आलु + मटर","आलु छोला","दम आलु","बैंगन भरता","मेथी मटर मलाई","वेज कोल्हापुरी","नवरतन कोरमा","काजु कडी","काजु मटर पनीर","मसाला ढेमस","भरता ढेमस","चना ढेमस","कुन्दस्त मसाला","भेंडी मसाला","कल्हारी आलू"]],
+      ["Dal", "दाल", ["साधी दाल","जिरा दाल","दाल फ्राय","दाल तडका","पचमेरी दाल","दाल मखनी","मुंग दाल खडी","दालचा","दाल पालक"]],
+      ["kadi", "कढी / रायता", ["खट्टी कडी","खट्टीमट्टी कडी","मारवाडी कडी","बुंदी रायता","वेज रायता","फुट रायता","लवकी रायता"]],
+      ["namkin", "नमकीन पदार्थ", ["दही वडा","दही भल्ला","भुजीया वडा","कांजी वडा","सपनीर चिल्ला","सांबार पाटोडी","आलु बोंडा","डिस्को कचोरी","मटर कचोरी","मेवा समोसा","मिरची भजीया","प्याज पकोडा","पनीर पकोडा","कोबी पकोडा","आलु पकोडा","मुंग पकोडा","पालक पकोडा","आलु टिकिया"]],
+      ["sweets", "गोड पदार्थ", ["मलाई चाप","गुलाबजामुन","काला जामुन","रसमलाई","मुंगदाल हलवा","बेसन हलवा","खोबरा बर्फी","जलेबी","रबडी जलेबी","रबडी मालपुआ","केसर जलेबी","रसगुल्ला","कश्मिरी रसगुल्ला","राजभोग","केसर भोज","दिलजानी","पानतवा","क्रिम चमचम","ऍप्पल जलेबी","मॅन्गो जलेबी","पाईनपल जलेबी","हिरा मनी","छेनारोल","संत्राबर्फी","मावावाटी","बदाम कतली","मावाबर्फी","संदेश","तवा सिजलर","मालपुआ","खोवा जलेबी","केसर कलाकंद","इमरती","इमरती रबडी","श्रीखंड","ड्राय फुड श्रीखंड","फुड कस्टड","छेना टरबुज","मक्खन केक","मख्खन जलेबी","शाही टोस्ट","रबडीशाही टोस्ट","अंगुरी रसमलाई","खवा पुरी","पुरनपोळी","बिल्लोरी","बादाम हलवा","बदाम रोल","काजु कतली","काजु रोल","काजु कमल","पिस्ता कतली","काजु केसर कतली","बदाम केसर हलवा","अंजीर रोल","गाजर हलवा","दही जलेबी","दही इमरती","पाकिजा बंगाली","सेंडविज"]],
+      ["chat", "चाट", ["गुपचप","भेल","पापडी चाट","मसाला दोसा","पावभाजी","शिमला चाट","चौपाटी चाट","आलु टिकिया","रगडा पेटीस","तवा आलुचाट","दही पापडी"]],
+      ["chaines", "चायनीज", ["पास्ता","नुडल्स","मन्चुरीयन","क्रिप्सी वेज","हराभरा कबाब","पनीर कबाब","टमाटर सुप","चिल्ली पनीर","शुगरकॅन्डी","कटलेट","चिज बॉल","चायनिज दोसा","आईसक्रिम"]]
+    ];
+
+    const DEFAULT_MENU_ITEMS = (() => {
+      const list = []; let id = 1;
+      RAW_MENU_GROUPS.forEach(([cat, desc, names]) => names.forEach(name => list.push({ id: id++, name, desc, cat })));
+      return list;
+    })();
+
+    const DEFAULT_REVIEWS = [
+      { id: 1, name: "संदीप देशमुख", event: "लग्न समारंभ", rating: 5, comment: "जेवणाची चव अप्रतिम होती आणि सर्व्हिस खूप तत्पर व स्वच्छ होती!" },
+      { id: 2, name: "स्नेहा कुलकर्णी", event: "वास्तुशांत", rating: 5, comment: "पनीर भाजी व गुलाबजामुन पाहुण्यांना खूप आवडले. धन्यवाद चिंतामणी कॅटरिंग!" }
+    ];
+
+    function seedDefaultsIfNeeded() {
+      try {
+        if (localStorage.getItem("chintamani_orders") === null) saveStore("chintamani_orders", []);
+        if (!localStorage.getItem("chintamani_reviews_seeded")) {
+          if (localStorage.getItem("chintamani_reviews") === null) saveStore("chintamani_reviews", DEFAULT_REVIEWS);
+          localStorage.setItem("chintamani_reviews_seeded", "1");
+        }
+      } catch (e) {}
+    }
+    seedDefaultsIfNeeded();
+
+    function getMergedSettings() {
+      const saved = loadStore("chintamani_settings", {});
+      const basePkgs = (saved && Array.isArray(saved.packages) && saved.packages.length)
+        ? saved.packages
+        : DEFAULT_SETTINGS.packages;
+      const mergedPkgs = basePkgs.map((pkg, i) => {
+        const fallbackPkg = DEFAULT_SETTINGS.packages[i] || DEFAULT_SETTINGS.packages[0];
+        const items = Array.isArray(pkg.items) ? pkg.items : (fallbackPkg.items || []);
+        return { ...fallbackPkg, ...pkg, items };
+      });
+      return {
+        ...DEFAULT_SETTINGS,
+        ...(saved && typeof saved === "object" ? saved : {}),
+        packages: mergedPkgs
+      };
+    }
+
+    let settings = getMergedSettings();
+    let editablePackages = JSON.parse(JSON.stringify(settings.packages));
+    let menuItems = loadStore("chintamani_menu", DEFAULT_MENU_ITEMS);
+    let orders = sanitizeOrdersList(loadStore("chintamani_orders", []));
+    let recycleBin = sanitizeOrdersList(loadStore("chintamani_recycle_bin", []));
+    let reviews = loadStore("chintamani_reviews", DEFAULT_REVIEWS);
+    let orderFilter = "all";
+    let eoSelectedItems = new Set();
+
+    function purgeExpiredRecycleBin() {
+      const now = Date.now();
+      const fresh = (recycleBin || []).filter(item => isValidOrder(item) && item.deletedAt && (now - Number(item.deletedAt)) < THIRTY_DAYS_MS);
+      if (fresh.length !== (recycleBin || []).length) {
+        recycleBin = fresh;
+        saveStore("chintamani_recycle_bin", recycleBin);
+      }
+      const badge = document.getElementById("recycleCountBadge");
+      if (badge) badge.textContent = recycleBin.length;
+    }
+
+    function renderLogo() {
+      const customLogo = loadStore("chintamani_custom_logo", null);
+      const content = customLogo ? '<img src="' + customLogo + '" alt="Logo" />' : DEFAULT_LOGO_SVG;
+      document.getElementById("headerLogoBox").innerHTML = content;
+      document.getElementById("dashLogoPreview").innerHTML = content;
+    }
+
+    function renderQrPreview() {
+      const customQr = loadStore("chintamani_custom_qr", null);
+      document.getElementById("dashQrPreview").innerHTML = customQr ? '<img src="' + customQr + '" alt="QR Code" />' : 'QR कोड अपलोड केलेला नाही';
+    }
+
+    function compressImageToDataURL(file, maxSize, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          let w = img.width, h = img.height;
+          if (w > maxSize || h > maxSize) {
+            if (w > h) { h = Math.round((h * maxSize) / w); w = maxSize; }
+            else { w = Math.round((w * maxSize) / h); h = maxSize; }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL("image/png", 0.9));
+        };
+        img.onerror = function() { callback(e.target.result); };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleLogoUpload(event) {
+      const file = event.target.files[0]; if (!file) return;
+      compressImageToDataURL(file, 400, (dataUrl) => {
+        saveStore("chintamani_custom_logo", dataUrl);
+        renderLogo(); notifyCustomerSite("settings_updated"); renderLivePreview();
+        pushCloud("/assets/logo.json", "PUT", dataUrl);
+        showToast("✅ कस्टम लोगो सेव्ह झाला! ग्राहक साईटवर अपडेट झाला.");
+      });
+    }
+
+    function resetLogo() {
+      delete memoryStore["chintamani_custom_logo"];
+      try { localStorage.removeItem("chintamani_custom_logo"); } catch (e) {}
+      document.getElementById("logoFileInput").value = "";
+      renderLogo(); notifyCustomerSite("settings_updated"); renderLivePreview();
+      pushCloud("/assets/logo.json", "DELETE");
+      showToast("↺ डिफॉल्ट लोगो सेट केला!");
+    }
+
+    function handleQrUpload(event) {
+      const file = event.target.files[0]; if (!file) return;
+      compressImageToDataURL(file, 600, (dataUrl) => {
+        saveStore("chintamani_custom_qr", dataUrl);
+        settings.qrTitle = document.getElementById("setQrTitle").value.trim() || DEFAULT_SETTINGS.qrTitle;
+        saveStore("chintamani_settings", settings);
+        renderQrPreview(); notifyCustomerSite("settings_updated"); renderLivePreview();
+        pushCloud("/assets/qr.json", "PUT", dataUrl);
+        pushCloud("/settings.json", "PUT", settings);
+        showToast("✅ QR कोड अपलोड झाला! ग्राहक साईटवर दिसेल.");
+      });
+    }
+
+    function saveQrTitle() {
+      settings.qrTitle = document.getElementById("setQrTitle").value.trim() || DEFAULT_SETTINGS.qrTitle;
+      saveStore("chintamani_settings", settings);
+      notifyCustomerSite("settings_updated"); renderLivePreview();
+      pushCloud("/settings.json", "PUT", settings);
+      showToast("✅ QR कोड माहिती सेव्ह झाली!");
+    }
+
+    function removeQrCode() {
+      delete memoryStore["chintamani_custom_qr"];
+      try { localStorage.removeItem("chintamani_custom_qr"); } catch (e) {}
+      document.getElementById("qrFileInput").value = "";
+      renderQrPreview(); notifyCustomerSite("settings_updated"); renderLivePreview();
+      pushCloud("/assets/qr.json", "DELETE");
+      showToast("🗑️ QR कोड काढला.");
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-section").forEach(s => s.classList.remove("active"));
+      document.getElementById("tab-" + tabName).classList.add("active");
+      document.querySelectorAll(".nav-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tabName));
+      if (tabName === "overview") renderOverview();
+      if (tabName === "orders") renderOrdersList();
+      if (tabName === "customer") { loadCustomerEditor(); renderMenuEditor(); renderQrPreview(); }
+      if (tabName === "reviews") renderOwnerReviews();
+    }
+
+    function setCustSubTab(mode) {
+      document.getElementById("btnCustEdit").classList.toggle("active", mode === "edit");
+      document.getElementById("btnCustPrev").classList.toggle("active", mode === "preview");
+      document.getElementById("custEditView").style.display = mode === "edit" ? "block" : "none";
+      document.getElementById("custPreviewView").style.display = mode === "preview" ? "block" : "none";
+      if (mode === "preview") renderLivePreview();
+    }
+
+    function refreshHeaderAndDropdowns() {
+      settings = getMergedSettings();
+      const loadedMenu = loadStore("chintamani_menu", DEFAULT_MENU_ITEMS);
+      menuItems = Array.isArray(loadedMenu) && loadedMenu.length ? loadedMenu : DEFAULT_MENU_ITEMS;
+      document.getElementById("ownerHdrTitle").textContent = settings.bizName + " (मालक)";
+      document.getElementById("ownerHdrSub").textContent = "Admin • " + settings.ownerName;
+      const pkgOptsHtml = '<option value="कस्टम मेनू">कस्टम मेनू</option>' +
+        settings.packages.map(p => {
+          const val = p.tag + " (" + p.price + ")";
+          return '<option value="' + escHtml(val) + '">' + escHtml(val) + '</option>';
+        }).join("");
+      document.getElementById("bPkg").innerHTML = pkgOptsHtml;
+      document.getElementById("eoPkg").innerHTML = pkgOptsHtml;
+      document.getElementById("menuTotalBadge").textContent = menuItems.length;
+    }
+
+    function syncPkgInputsToState() {
+      editablePackages = editablePackages.map((p, idx) => {
+        const tagEl = document.getElementById("pkgTag" + idx);
+        if (!tagEl) return p;
+        return {
+          ...p,
+          tag: tagEl.value.trim() || p.tag,
+          title: document.getElementById("pkgTitle" + idx).value.trim() || p.title,
+          price: document.getElementById("pkgPrice" + idx).value.trim() || p.price,
+          unit: document.getElementById("pkgUnit" + idx).value.trim() || "/ प्लेटपासून",
+          desc: document.getElementById("pkgDesc" + idx).value.trim(),
+          featured: document.getElementById("pkgFeat" + idx).checked
+        };
+      });
+    }
+
+    function renderPackagesEditor() {
+      const wrap = document.getElementById("pkgEditorsWrap");
+      wrap.innerHTML = editablePackages.map((p, idx) => {
+        const pkgItems = Array.isArray(p.items) ? p.items : [];
+        const chipsHtml = pkgItems.length
+          ? pkgItems.map((it, itemIdx) =>
+              '<span class="selected-chip">' + escHtml(it) +
+              ' <button type="button" onclick="removeItemFromPackage(' + idx + ', ' + itemIdx + ')">✕</button></span>'
+            ).join("")
+          : '<span style="font-size:0.74rem; color:var(--muted);">या पॅकेजमध्ये अजून पदार्थ जोडलेले नाहीत</span>';
+
+        return '<div class="pkg-edit-box">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">' +
+            '<strong style="font-size:0.84rem; color:var(--primary);">पॅकेज ' + (idx + 1) + '</strong>' +
+            '<div style="display:flex; align-items:center; gap:8px;">' +
+              '<label style="font-size:0.74rem; font-weight:700; display:flex; align-items:center; gap:4px; cursor:pointer; margin:0;">' +
+                '<input type="checkbox" id="pkgFeat' + idx + '" ' + (p.featured ? 'checked' : '') + ' style="width:auto;" /> ⭐ खास हायलाइट' +
+              '</label>' +
+              (editablePackages.length > 1 ? '<button type="button" class="btn-sm btn-danger" style="padding:3px 7px; font-size:0.7rem;" onclick="removePackage(' + idx + ')">काढा</button>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="grid-2"><div class="form-group"><label>पॅकेज नाव (Tag)</label><input type="text" id="pkgTag' + idx + '" value="' + escHtml(p.tag) + '" /></div>' +
+          '<div class="form-group"><label>शीर्षक (Title)</label><input type="text" id="pkgTitle' + idx + '" value="' + escHtml(p.title) + '" /></div></div>' +
+          '<div class="grid-2"><div class="form-group"><label>दर (Rate)</label><input type="text" id="pkgPrice' + idx + '" value="' + escHtml(p.price) + '" /></div>' +
+          '<div class="form-group"><label>युनिट</label><input type="text" id="pkgUnit' + idx + '" value="' + escHtml(p.unit || '/ प्लेटपासून') + '" /></div></div>' +
+          '<div class="form-group" style="margin-bottom:6px;"><label>माहिती (Description)</label><input type="text" id="pkgDesc' + idx + '" value="' + escHtml(p.desc) + '" /></div>' +
+          '<div class="pkg-items-editor">' +
+            '<div style="font-size:0.75rem; font-weight:800; color:var(--primary); margin-bottom:5px;">🍽️ पॅकेजमधील पदार्थ (' + pkgItems.length + '):</div>' +
+            '<div class="chip-wrap">' + chipsHtml + '</div>' +
+            '<div style="display:flex; gap:6px;">' +
+              '<input type="text" id="pkgNewItem' + idx + '" list="allDishesDatalist" placeholder="मेनूमधून निवडा किंवा नवीन पदार्थ लिहा..." style="flex:1; padding:6px 9px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit; font-size:0.78rem;" />' +
+              '<button type="button" class="btn-sm btn-primary" onclick="addItemToPackage(' + idx + ')">+ जोडा</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
+
+    function addItemToPackage(pkgIdx) {
+      syncPkgInputsToState();
+      const inp = document.getElementById("pkgNewItem" + pkgIdx);
+      const val = (inp ? inp.value : "").trim();
+      if (!val) return;
+      const newNames = val.split(",").map(s => s.trim()).filter(Boolean);
+      const curItems = editablePackages[pkgIdx].items || [];
+      newNames.forEach(n => { if (!curItems.includes(n)) curItems.push(n); });
+      editablePackages[pkgIdx].items = curItems;
+      renderPackagesEditor();
+    }
+
+    function removeItemFromPackage(pkgIdx, itemIdx) {
+      syncPkgInputsToState();
+      editablePackages[pkgIdx].items.splice(itemIdx, 1);
+      renderPackagesEditor();
+    }
+
+    function addNewPackage() {
+      syncPkgInputsToState();
+      editablePackages.push({
+        tag: "स्पेशल पॅकेज",
+        title: "नवीन मेजवानी मेनू",
+        price: "₹ २५०",
+        unit: "/ प्लेटपासून",
+        desc: "खास कार्यक्रमासाठी निवडक पदार्थ",
+        featured: false,
+        items: ["पनीर टिक्का", "तन्दुरी रोटी", "जिरा राईस", "शाही पनीर", "दाल तडका", "गुलाबजामुन"]
+      });
+      renderPackagesEditor();
+    }
+
+    function removePackage(pkgIdx) {
+      syncPkgInputsToState();
+      editablePackages.splice(pkgIdx, 1);
+      renderPackagesEditor();
+    }
+
+    function updateDishesDatalist() {
+      let dl = document.getElementById("allDishesDatalist");
+      if (!dl) {
+        dl = document.createElement("datalist");
+        dl.id = "allDishesDatalist";
+        document.body.appendChild(dl);
+      }
+      dl.innerHTML = menuItems.map(m => '<option value="' + escHtml(m.name) + '"></option>').join("");
+    }
+
+    function loadCustomerEditor() {
+      refreshHeaderAndDropdowns();
+      editablePackages = JSON.parse(JSON.stringify(settings.packages));
+      document.getElementById("setBizName").value = settings.bizName;
+      document.getElementById("setOwnerName").value = settings.ownerName;
+      document.getElementById("setPhone").value = settings.phone;
+      document.getElementById("setAddress").value = settings.address;
+      document.getElementById("setQrTitle").value = settings.qrTitle || DEFAULT_SETTINGS.qrTitle;
+
+      updateDishesDatalist();
+      renderPackagesEditor();
+
+      const catOpts = CAT_LIST.map(c => '<option value="' + c.id + '">' + c.label + '</option>').join("");
+      document.getElementById("newDishCat").innerHTML = catOpts;
+      document.getElementById("editDishCat").innerHTML = catOpts;
+      document.getElementById("menuEditCatFilter").innerHTML = '<option value="all">सर्व कॅटेगरी</option>' + catOpts;
+      renderQrPreview();
+    }
+
+    function saveGeneralSettings() {
+      const cleanPh = getCleanPhone(document.getElementById("setPhone").value);
+      if (cleanPh.length !== 10) {
+        alert("कृपया बरोबर १० अंकी मोबाईल नंबर टाका!");
+        return;
+      }
+      settings.bizName = document.getElementById("setBizName").value.trim() || DEFAULT_SETTINGS.bizName;
+      settings.ownerName = document.getElementById("setOwnerName").value.trim() || DEFAULT_SETTINGS.ownerName;
+      settings.phone = cleanPh;
+      settings.address = document.getElementById("setAddress").value.trim() || DEFAULT_SETTINGS.address;
+      saveStore("chintamani_settings", settings);
+      notifyCustomerSite("settings_updated"); refreshHeaderAndDropdowns(); renderLivePreview();
+      pushCloud("/settings.json", "PUT", settings);
+      showToast("✅ नाव, नंबर व पत्ता सेव्ह झाला! ग्राहक साईटवर अपडेट झाला.");
+    }
+
+    function savePackages() {
+      syncPkgInputsToState();
+      settings.packages = JSON.parse(JSON.stringify(editablePackages));
+      saveStore("chintamani_settings", settings);
+      notifyCustomerSite("settings_updated"); refreshHeaderAndDropdowns(); renderLivePreview();
+      pushCloud("/settings.json", "PUT", settings);
+      showToast("✅ सर्व पॅकेजेस व त्यातील पदार्थ सेव्ह झाले!");
+    }
+
+    function renderMenuEditor() {
+      const q = (document.getElementById("menuEditSearch").value || "").trim().toLowerCase();
+      const cat = document.getElementById("menuEditCatFilter").value || "all";
+      const filtered = menuItems.filter(m => (cat === "all" || m.cat === cat) && (!q || m.name.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)));
+      document.getElementById("menuTotalBadge").textContent = menuItems.length;
+      document.getElementById("menuEditorList").innerHTML = !filtered.length
+        ? '<p style="color:var(--muted); font-size:0.84rem; text-align:center; padding:12px;">पदार्थ सापडला नाही.</p>'
+        : filtered.map(m =>
+          '<div class="menu-edit-row"><div style="min-width:0; flex:1;"><strong style="font-size:0.88rem;">⭐ ' + escHtml(m.name) + '</strong><div style="font-size:0.74rem; color:var(--muted);">' + escHtml(m.desc) + '</div></div>' +
+          '<div style="display:flex; gap:5px; flex-shrink:0;"><button class="btn-sm btn-outline" onclick="openDishModal(' + m.id + ')">✏️</button><button class="btn-sm btn-danger" onclick="deleteDish(' + m.id + ')">🗑️</button></div></div>'
+        ).join("");
+    }
+
+    function addNewDish() {
+      const name = document.getElementById("newDishName").value.trim();
+      if (!name) { alert("पदार्थाचे नाव टाका!"); return; }
+      const cat = document.getElementById("newDishCat").value;
+      const catLabel = (CAT_LIST.find(c => c.id === cat) || {}).label || "पदार्थ";
+      const desc = document.getElementById("newDishDesc").value.trim() || catLabel;
+      menuItems.unshift({ id: Date.now(), name, desc, cat });
+      saveStore("chintamani_menu", menuItems);
+      notifyCustomerSite("menu_updated");
+      pushCloud("/menu.json", "PUT", menuItems);
+      document.getElementById("newDishName").value = "";
+      document.getElementById("newDishDesc").value = "";
+      updateDishesDatalist();
+      renderMenuEditor();
+      showToast("✅ '" + name + "' मेनूमध्ये जोडला! ग्राहक साईटवर दिसेल.");
+    }
+
+    function openDishModal(id) {
+      const dish = menuItems.find(m => m.id === id); if (!dish) return;
+      document.getElementById("editDishId").value = dish.id;
+      document.getElementById("editDishName").value = dish.name;
+      document.getElementById("editDishCat").value = dish.cat;
+      document.getElementById("editDishDesc").value = dish.desc;
+      document.getElementById("dishEditModal").classList.add("open");
+    }
+    function closeDishModal() { document.getElementById("dishEditModal").classList.remove("open"); }
+
+    function saveEditedDish() {
+      const id = Number(document.getElementById("editDishId").value);
+      const dish = menuItems.find(m => m.id === id); if (!dish) return;
+      const name = document.getElementById("editDishName").value.trim();
+      if (!name) { alert("नाव रिकामे ठेवता येणार नाही!"); return; }
+      dish.name = name;
+      dish.cat = document.getElementById("editDishCat").value;
+      dish.desc = document.getElementById("editDishDesc").value.trim() || "पदार्थ";
+      saveStore("chintamani_menu", menuItems);
+      notifyCustomerSite("menu_updated");
+      pushCloud("/menu.json", "PUT", menuItems);
+      closeDishModal(); updateDishesDatalist(); renderMenuEditor();
+      showToast("✅ पदार्थ अपडेट केला!");
+    }
+
+    function deleteDish(id) {
+      menuItems = menuItems.filter(m => m.id !== id);
+      saveStore("chintamani_menu", menuItems);
+      notifyCustomerSite("menu_updated");
+      pushCloud("/menu.json", "PUT", menuItems);
+      updateDishesDatalist(); renderMenuEditor();
+      showToast("🗑️ पदार्थ मेनूमधून काढला.");
+    }
+
+    function resetMenuDefault() {
+      if (!confirm("मूळ २०९ पदार्थांचा डिफॉल्ट मेनू रिसेट करायचा का?")) return;
+      menuItems = JSON.parse(JSON.stringify(DEFAULT_MENU_ITEMS));
+      saveStore("chintamani_menu", menuItems);
+      notifyCustomerSite("menu_updated");
+      pushCloud("/menu.json", "PUT", menuItems);
+      updateDishesDatalist(); renderMenuEditor();
+      showToast("↺ डिफॉल्ट मेनू रिसेट झाला!");
+    }
+
+    function renderLivePreview() {
+      const s = getMergedSettings();
+      const items = loadStore("chintamani_menu", DEFAULT_MENU_ITEMS);
+      const customLogo = loadStore("chintamani_custom_logo", null);
+      const customQr = loadStore("chintamani_custom_qr", null);
+      const logoHtml = customLogo ? '<img src="' + customLogo + '" alt="Logo" />' : DEFAULT_LOGO_SVG;
+      const offerHtml = (s.specialOffer && s.specialOffer.trim())
+        ? '<div class="preview-offer">' + escHtml(s.specialOffer) + '</div>' : '';
+
+      const pkgsHtml = (s.packages || []).map(p => {
+        const pItems = Array.isArray(p.items) ? p.items : [];
+        return '<div style="background:#fff; border:1.5px solid ' + (p.featured ? 'var(--gold)' : 'var(--border)') + '; border-radius:10px; padding:8px; display:flex; flex-direction:column; justify-content:space-between;">' +
+          '<div>' +
+            '<span style="font-size:0.65rem; font-weight:800; background:#FEF3C7; color:#92400E; padding:2px 6px; border-radius:999px;">' + escHtml(p.tag) + '</span>' +
+            '<div style="font-size:0.82rem; font-weight:800; margin-top:3px;">' + escHtml(p.title) + '</div>' +
+            '<div style="font-size:0.95rem; font-weight:800; color:var(--primary);">' + escHtml(p.price) + ' <span style="font-size:0.66rem; color:var(--muted);">' + escHtml(p.unit || '') + '</span></div>' +
+            '<div style="font-size:0.68rem; color:var(--muted); margin:3px 0;">' + escHtml(p.desc) + '</div>' +
+            (pItems.length ? '<div style="background:#FFF9F2; border:1px solid var(--border); border-radius:6px; padding:4px 6px; margin-top:4px; font-size:0.64rem;"><strong>मेनू (' + pItems.length + '):</strong> ' + escHtml(pItems.join(", ")) + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join("");
+
+      const qrHtml = customQr
+        ? '<div style="margin-top:12px; background:#fff; border:1.5px solid #FDE68A; border-radius:12px; padding:12px; text-align:center;">' +
+          '<div style="font-size:0.84rem; font-weight:800; color:var(--primary); margin-bottom:6px;">' + escHtml(s.qrTitle || DEFAULT_SETTINGS.qrTitle) + '</div>' +
+          '<img src="' + customQr + '" alt="QR" style="width:140px; height:140px; object-fit:contain; border-radius:10px; border:1px solid var(--border); padding:4px; background:#fff;" /></div>'
+        : '';
+
+      const sampleMenuHtml = items.slice(0, 6).map(m =>
+        '<div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:9px 11px; display:flex; justify-content:space-between; align-items:center;">' +
+        '<div><strong style="font-size:0.85rem;">⭐ ' + escHtml(m.name) + '</strong><div style="font-size:0.7rem; color:var(--muted);">' + escHtml(m.desc) + '</div></div>' +
+        '<span style="font-size:0.72rem; font-weight:700; color:var(--primary); border:1px solid var(--primary); padding:4px 8px; border-radius:8px;">+ निवडा</span></div>'
+      ).join("");
+
+      document.getElementById("liveCustomerPreview").innerHTML = offerHtml +
+        '<div class="preview-header"><div style="display:flex; align-items:center; gap:9px;"><div class="logo-box" style="width:44px; height:44px;">' + logoHtml + '</div>' +
+        '<div><div style="font-size:0.95rem; font-weight:800;">' + escHtml(s.bizName) + '</div><div style="font-size:0.72rem; color:#FDE68A;">👤 ' + escHtml(s.ownerName) + '</div><div style="font-size:0.64rem; opacity:0.9;">📍 ' + escHtml(s.address) + '</div></div></div>' +
+        '<span style="font-size:0.7rem; border:1px solid rgba(253,230,138,0.6); padding:5px 9px; border-radius:999px;">📞 ' + escHtml(s.phone) + '</span></div>' +
+        '<div style="padding:12px;"><div style="font-size:0.88rem; font-weight:800; color:var(--primary); margin-bottom:6px;">💰 आमचे खास पॅकेजेस</div>' +
+        '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:6px; margin-bottom:12px;">' + pkgsHtml + '</div>' +
+        '<div style="font-size:0.9rem; font-weight:800; color:var(--primary); margin:4px 0 8px;">🍽️ मेनू यादी (एकूण ' + items.length + ' पैकी पहिले ६)</div>' +
+        '<div style="display:grid; gap:8px;">' + sampleMenuHtml + '</div>' + qrHtml + '</div>';
+    }
+
+    function isOwnerEditingForm() {
+      const active = document.activeElement;
+      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.tagName === "SELECT")) return true;
+      if (document.getElementById("ownerModal").classList.contains("open")) return true;
+      if (document.getElementById("ownerEditOrderModal").classList.contains("open")) return true;
+      if (document.getElementById("dishEditModal").classList.contains("open")) return true;
+      return false;
+    }
+
+    function extractAllLocalOrders() {
+      const combined = [];
+      const keysToCheck = ["chintamani_orders", "chintamani_customer_orders", "customer_orders", "orders", "catering_orders"];
+      keysToCheck.forEach(k => {
+        const val = loadStore(k, null);
+        if (Array.isArray(val)) combined.push(...val);
+        else if (val && typeof val === "object") combined.push(...Object.values(val));
+      });
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k) continue;
+          if ((k.includes("order") || k.includes("booking")) && !k.includes("recycle")) {
+            const parsed = JSON.parse(localStorage.getItem(k) || "null");
+            if (Array.isArray(parsed)) combined.push(...parsed);
+            else if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) combined.push(...Object.values(parsed));
+          }
+        }
+      } catch (e) {}
+      return sanitizeOrdersList(combined);
+    }
+
+    async function syncFromSources(notify, fromCloud = true) {
+      orders = extractAllLocalOrders();
+      recycleBin = sanitizeOrdersList(loadStore("chintamani_recycle_bin", []));
+      const rawRevs = loadStore("chintamani_reviews", DEFAULT_REVIEWS);
+      reviews = Array.isArray(rawRevs) ? rawRevs.filter(r => r && typeof r.name === "string" && r.name.trim() !== "") : DEFAULT_REVIEWS;
+      settings = getMergedSettings();
+      const loadedMenu = loadStore("chintamani_menu", DEFAULT_MENU_ITEMS);
+      menuItems = Array.isArray(loadedMenu) && loadedMenu.length ? loadedMenu : DEFAULT_MENU_ITEMS;
+
+      if (fromCloud && FIREBASE_DB_URL) {
+        try {
+          const base = FIREBASE_DB_URL.replace(/\/$/, "");
+          const [oRes, rRes] = await Promise.all([fetch(base + "/orders.json"), fetch(base + "/reviews.json")]);
+          const oData = await oRes.json(), rData = await rRes.json();
+          if (oData && typeof oData === "object") {
+            const deletedIds = new Set(recycleBin.map(r => String(r.id)));
+            const cloudOrders = sanitizeOrdersList(Object.values(oData)).filter(o => !deletedIds.has(String(o.id)));
+            orders = sanitizeOrdersList([...cloudOrders, ...orders]).filter(o => !deletedIds.has(String(o.id)));
+            saveStore("chintamani_orders", orders);
+          }
+          if (rData !== null && typeof rData === "object") {
+            reviews = Object.values(rData).filter(r => r && typeof r.name === "string" && r.name.trim() !== "").sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+            saveStore("chintamani_reviews", reviews);
+          }
+        } catch (e) {}
+      }
+      purgeExpiredRecycleBin();
+      renderOverview(); renderOrdersList(); renderOwnerReviews(); renderLogo(); refreshHeaderAndDropdowns();
+      if (notify) showToast("🔄 नवीन माहिती अपडेट झाली!");
+    }
+
+    function manualSync() { syncFromSources(true, true); }
+
+    function checkLocalSync(notify) {
+      if (isOwnerEditingForm()) return;
+      try {
+        const ts = localStorage.getItem("chintamani_sync_ts") || "";
+        if (ts && ts !== lastKnownSyncTs) {
+          lastKnownSyncTs = ts;
+          syncFromSources(notify, false);
+        }
+      } catch (e) {}
+    }
+
+    window.addEventListener("storage", () => {
+      try { lastKnownSyncTs = localStorage.getItem("chintamani_sync_ts") || ""; } catch (e) {}
+      if (!isOwnerEditingForm()) syncFromSources(true, false);
+    });
+    window.addEventListener("focus", () => { checkLocalSync(false); if (!isOwnerEditingForm()) syncFromSources(false, true); });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkLocalSync(false); if (!isOwnerEditingForm()) syncFromSources(false, true); } });
+    if (syncChannel) {
+      syncChannel.onmessage = (ev) => {
+        if (ev && ev.data && ev.data.source === "owner") return;
+        if (ev && ev.data && ev.data.ts) lastKnownSyncTs = ev.data.ts;
+        if (!isOwnerEditingForm()) syncFromSources(true, false);
+      };
+    }
+
+    setInterval(() => checkLocalSync(true), 2500);
+    if (FIREBASE_DB_URL) setInterval(() => { if (!isOwnerEditingForm()) syncFromSources(false, true); }, 8000);
+
+    function openOrderModal() {
+      refreshHeaderAndDropdowns();
+      document.getElementById("bMonth").value = MARATHI_MONTHS[new Date().getMonth()];
+      document.getElementById("bItems").value = "";
+      document.getElementById("ownerModal").classList.add("open");
+    }
+    function closeOrderModal() { document.getElementById("ownerModal").classList.remove("open"); }
+
+    function handleNewBookingPkgChange() {
+      const val = document.getElementById("bPkg").value;
+      const pkg = (settings.packages || []).find(p => (p.tag + " (" + p.price + ")") === val);
+      if (pkg && Array.isArray(pkg.items) && pkg.items.length) {
+        document.getElementById("bItems").value = pkg.items.join(", ");
+      } else if (val === "कस्टम मेनू") {
+        document.getElementById("bItems").value = "";
+      }
+    }
+
+    async function saveOwnerBooking() {
+      const name = document.getElementById("bName").value.trim();
+      const rawPhone = document.getElementById("bPhone").value.replace(/\D/g, "");
+      if (!name) { alert("कृपया ग्राहकाचे नाव टाका!"); return; }
+      if (rawPhone.length !== 10) { alert("कृपया बरोबर १० अंकी मोबाईल नंबर टाका!"); return; }
+
+      const newOrder = {
+        id: Date.now(), name, phone: rawPhone,
+        pkg: document.getElementById("bPkg").value,
+        place: document.getElementById("bPlace").value.trim() || "सांगितलेले नाही",
+        date: document.getElementById("bDate").value.trim() || "सांगितलेली नाही",
+        monthLabel: document.getElementById("bMonth").value,
+        guests: document.getElementById("bGuests").value.trim() || "-",
+        items: (document.getElementById("bItems").value.trim() || "").split(",").map(s => s.trim()).filter(Boolean),
+        status: document.getElementById("bStatus").value,
+        feedback: document.getElementById("bFeedback").value.trim() || "-"
+      };
+      orders = sanitizeOrdersList([newOrder, ...extractAllLocalOrders()]);
+      saveStore("chintamani_orders", orders);
+      notifyCustomerSite("orders_updated");
+      pushCloud("/orders/" + newOrder.id + ".json", "PUT", newOrder);
+
+      ["bName","bPhone","bPlace","bDate","bGuests","bItems","bFeedback"].forEach(id => document.getElementById(id).value = "");
+      closeOrderModal(); renderOverview(); renderOrdersList();
+      showToast("✅ नवीन बुकिंग सेव्ह झाली! ग्राहक साईटवरही दिसेल.");
+    }
+
+    function openOwnerEditOrderModal(id) {
+      orders = extractAllLocalOrders();
+      const o = orders.find(x => x.id === id);
+      if (!o) return;
+
+      refreshHeaderAndDropdowns();
+      document.getElementById("eoId").value = o.id;
+      document.getElementById("eoName").value = o.name || "";
+      document.getElementById("eoPhone").value = getCleanPhone(o.phone);
+      document.getElementById("eoPlace").value = (o.place && o.place !== "सांगितलेले नाही") ? o.place : "";
+      document.getElementById("eoGuests").value = (o.guests && o.guests !== "-") ? o.guests : "";
+      document.getElementById("eoDate").value = (o.date && o.date !== "सांगितलेली नाही") ? o.date : "";
+      document.getElementById("eoMonth").value = MARATHI_MONTHS.includes(o.monthLabel) ? o.monthLabel : MARATHI_MONTHS[new Date().getMonth()];
+      document.getElementById("eoStatus").value = ["pending","confirmed","completed","cancelled"].includes(o.status) ? o.status : "pending";
+      document.getElementById("eoFeedback").value = (o.feedback && o.feedback !== "-") ? o.feedback : "";
+
+      const pkgSel = document.getElementById("eoPkg");
+      if (o.pkg) {
+        if (!Array.from(pkgSel.options).some(opt => opt.value === o.pkg)) {
+          const opt = document.createElement("option");
+          opt.value = o.pkg; opt.textContent = o.pkg;
+          pkgSel.appendChild(opt);
+        }
+        pkgSel.value = o.pkg;
+      }
+
+      eoSelectedItems = new Set(Array.isArray(o.items) ? o.items : []);
+      document.getElementById("eoMenuSearch").value = "";
+      document.getElementById("eoCustomDishInput").value = "";
+      renderOwnerEditSelectedChips();
+      renderOwnerEditMenuList();
+      document.getElementById("ownerEditOrderModal").classList.add("open");
+    }
+
+    function closeOwnerEditOrderModal() { document.getElementById("ownerEditOrderModal").classList.remove("open"); }
+
+    function renderOwnerEditSelectedChips() {
+      document.getElementById("eoItemsCount").textContent = eoSelectedItems.size;
+      const wrap = document.getElementById("eoSelectedChips");
+      wrap.innerHTML = !eoSelectedItems.size
+        ? '<span style="font-size:0.76rem; color:var(--muted);">कोणतेही पदार्थ निवडलेले नाहीत</span>'
+        : Array.from(eoSelectedItems).map(name =>
+            '<span class="selected-chip">' + escHtml(name) + ' <button type="button" data-item="' + escHtml(name) + '" onclick="toggleOwnerEditMenuItem(this.dataset.item)">✕</button></span>'
+          ).join("");
+    }
+
+    function renderOwnerEditMenuList() {
+      const q = (document.getElementById("eoMenuSearch").value || "").trim().toLowerCase();
+      const filtered = menuItems.filter(m => !q || m.name.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q));
+      const box = document.getElementById("eoMenuChecklist");
+      box.innerHTML = !filtered.length
+        ? '<p style="font-size:0.8rem; color:var(--muted); text-align:center; padding:10px;">पदार्थ सापडला नाही.</p>'
+        : filtered.map(m => {
+            const isSel = eoSelectedItems.has(m.name);
+            return '<div class="edit-menu-check-row">' +
+              '<div><strong style="font-size:0.82rem;">' + escHtml(m.name) + '</strong> <span style="font-size:0.7rem; color:var(--muted);">(' + escHtml(m.desc) + ')</span></div>' +
+              '<button type="button" class="btn-sm ' + (isSel ? 'btn-success' : 'btn-outline') + '" data-item="' + escHtml(m.name) + '" onclick="toggleOwnerEditMenuItem(this.dataset.item)">' +
+              (isSel ? '✓ निवडले' : '+ जोडा') + '</button></div>';
+          }).join("");
+    }
+
+    function toggleOwnerEditMenuItem(name) {
+      if (eoSelectedItems.has(name)) eoSelectedItems.delete(name);
+      else eoSelectedItems.add(name);
+      renderOwnerEditSelectedChips(); renderOwnerEditMenuList();
+    }
+
+    function addCustomDishToOwnerEdit() {
+      const inp = document.getElementById("eoCustomDishInput");
+      const val = inp.value.trim();
+      if (!val) return;
+      val.split(",").map(s => s.trim()).filter(Boolean).forEach(item => eoSelectedItems.add(item));
+      inp.value = "";
+      renderOwnerEditSelectedChips(); renderOwnerEditMenuList();
+    }
+
+    async function saveOwnerEditedOrder() {
+      const id = Number(document.getElementById("eoId").value);
+      orders = extractAllLocalOrders();
+      const idx = orders.findIndex(o => o.id === id);
+      if (idx === -1) return;
+
+      const name = document.getElementById("eoName").value.trim();
+      const phone = document.getElementById("eoPhone").value.replace(/\D/g, "");
+      if (!name) { alert("कृपया ग्राहकाचे नाव टाका!"); return; }
+      if (phone.length !== 10) { alert("कृपया बरोबर १० अंकी मोबाईल नंबर टाका!"); return; }
+
+      orders[idx] = {
+        ...orders[idx],
+        name, phone,
+        place: document.getElementById("eoPlace").value.trim() || "सांगितलेले नाही",
+        guests: document.getElementById("eoGuests").value.trim() || "-",
+        date: document.getElementById("eoDate").value.trim() || "सांगितलेली नाही",
+        monthLabel: document.getElementById("eoMonth").value,
+        pkg: document.getElementById("eoPkg").value,
+        status: document.getElementById("eoStatus").value,
+        feedback: document.getElementById("eoFeedback").value.trim() || "-",
+        items: Array.from(eoSelectedItems)
+      };
+
+      saveStore("chintamani_orders", orders);
+      notifyCustomerSite("orders_updated");
+      pushCloud("/orders/" + id + ".json", "PUT", orders[idx]);
+
+      closeOwnerEditOrderModal(); renderOverview(); renderOrdersList();
+      showToast("✅ ग्राहकाची ऑर्डर यशस्वीरित्या एडिट झाली!");
+    }
+
+    async function setOrderStatus(id, newStatus) {
+      orders = extractAllLocalOrders();
+      const order = orders.find(o => o.id === id); if (!order) return;
+      order.status = newStatus;
+      order.statusMessage = newStatus === "cancelled"
+        ? "तुमची ऑर्डर रद्द करण्यात आली आहे."
+        : (newStatus === "confirmed" ? "तुमची ऑर्डर कन्फर्म झाली आहे." : (newStatus === "completed" ? "तुमची ऑर्डर पूर्ण झाली आहे." : "तुमची ऑर्डर प्रतीक्षेत आहे."));
+      order.updatedAt = Date.now();
+      saveStore("chintamani_orders", orders);
+      notifyCustomerSite("orders_updated");
+      pushCloud("/orders/" + id + ".json", "PATCH", {
+        status: newStatus,
+        statusMessage: order.statusMessage,
+        updatedAt: order.updatedAt
+      });
+      renderOverview(); renderOrdersList();
+      const labels = {
+        pending: "⏳ प्रतीक्षेत केले! ग्राहकाला अपडेट पाठवली.",
+        confirmed: "✅ ऑर्डर कन्फर्म केली! ग्राहकाला अपडेट पाठवली.",
+        completed: "🎉 ऑर्डर Complete केली! ग्राहकाला अपडेट पाठवली.",
+        cancelled: "❌ ऑर्डर रद्द केली! ग्राहकाला अपडेट पाठवली."
+      };
+      showToast(labels[newStatus] || "✅ स्टेटस बदलले!");
+    }
+
+    async function deleteOrder(id) {
+      orders = extractAllLocalOrders();
+      const target = orders.find(o => o.id === id);
+      if (!target) return;
+      orders = orders.filter(o => o.id !== id);
+      saveStore("chintamani_orders", orders);
+
+      recycleBin.unshift({ ...target, deletedAt: Date.now() });
+      saveStore("chintamani_recycle_bin", recycleBin);
+      purgeExpiredRecycleBin();
+      notifyCustomerSite("orders_updated");
+      pushCloud("/orders/" + id + ".json", "DELETE");
+
+      renderOverview(); renderOrdersList();
+      showToast("🗑️ ऑर्डर ३० दिवसांसाठी रिसायकल बिनमध्ये हलवली!");
+    }
+
+    async function restoreFromRecycleBin(id) {
+      const target = recycleBin.find(o => o.id === id);
+      if (!target) return;
+      recycleBin = recycleBin.filter(o => o.id !== id);
+      saveStore("chintamani_recycle_bin", recycleBin);
+
+      const restored = { ...target };
+      delete restored.deletedAt;
+      orders = sanitizeOrdersList([restored, ...extractAllLocalOrders()]);
+      saveStore("chintamani_orders", orders);
+      purgeExpiredRecycleBin();
+      notifyCustomerSite("orders_updated");
+      pushCloud("/orders/" + restored.id + ".json", "PUT", restored);
+
+      renderOverview(); renderOrdersList();
+      showToast("♻️ ऑर्डर पुन्हा सक्रिय यादीत रिस्टोअर केली!");
+    }
+
+    function permanentDeleteOrder(id) {
+      if (!confirm("ही ऑर्डर रिसायकल बिनमधून कायमची डिलीट करायची का?")) return;
+      recycleBin = recycleBin.filter(o => o.id !== id);
+      saveStore("chintamani_recycle_bin", recycleBin);
+      purgeExpiredRecycleBin();
+      renderOrdersList();
+      showToast("❌ ऑर्डर कायमची डिलीट केली!");
+    }
+
+    function emptyRecycleBin() {
+      if (!recycleBin.length) return;
+      if (!confirm("रिसायकल बिनमधील सर्व ऑर्डर्स कायमच्या डिलीट करायच्या का?")) return;
+      recycleBin = [];
+      saveStore("chintamani_recycle_bin", recycleBin);
+      purgeExpiredRecycleBin();
+      renderOrdersList();
+      showToast("🧹 रिसायकल बिन रिकामा केला!");
+    }
+
+    function setOrderFilter(filter, btnEl) {
+      orderFilter = filter;
+      document.querySelectorAll(".filter-pills .cat-btn").forEach(b => b.classList.remove("active"));
+      btnEl.classList.add("active"); renderOrdersList();
+    }
+
+    function getStatusBadge(status) {
+      switch (status) {
+        case "confirmed": return { text: "✅ कन्फर्म", cls: "badge-confirmed" };
+        case "completed": return { text: "🎉 Complete", cls: "badge-completed" };
+        case "cancelled": return { text: "❌ रद्द", cls: "badge-cancelled" };
+        default: return { text: "⏳ Pending", cls: "badge-pending" };
+      }
+    }
+
+    function buildOrderCard(o) {
+      const st = getStatusBadge(o.status);
+      const itemsStr = (o.items && o.items.length) ? o.items.join(", ") : (o.pkg || "-");
+      const cleanPhone = getCleanPhone(o.phone);
+      const waLink = cleanPhone.length === 10 ? "https://wa.me/91" + cleanPhone + "?text=" + encodeURIComponent("नमस्कार " + o.name + ", " + settings.bizName + " कडून तुमच्या " + o.date + " च्या कार्यक्रमाबद्दल संपर्क करत आहोत.") : "";
+
+      let quickStatusBtns = "";
+      if (o.status === "pending") {
+        quickStatusBtns = '<button class="btn-sm btn-success" onclick="setOrderStatus(' + o.id + ', \'confirmed\')">✅ कन्फर्म</button>' +
+                          '<button class="btn-sm btn-primary" onclick="setOrderStatus(' + o.id + ', \'completed\')">🎉 Complete</button>' +
+                          '<button class="btn-sm btn-danger" onclick="setOrderStatus(' + o.id + ', \'cancelled\')">❌ रद्द</button>';
+      } else if (o.status === "confirmed") {
+        quickStatusBtns = '<button class="btn-sm btn-primary" onclick="setOrderStatus(' + o.id + ', \'completed\')">🎉 Complete</button>' +
+                          '<button class="btn-sm btn-warning" onclick="setOrderStatus(' + o.id + ', \'pending\')">↺ Pending</button>' +
+                          '<button class="btn-sm btn-danger" onclick="setOrderStatus(' + o.id + ', \'cancelled\')">❌ रद्द</button>';
+      } else if (o.status === "cancelled") {
+        quickStatusBtns = '<button class="btn-sm btn-warning" onclick="setOrderStatus(' + o.id + ', \'pending\')">↺ Pending करा</button>' +
+                          '<button class="btn-sm btn-success" onclick="setOrderStatus(' + o.id + ', \'confirmed\')">✅ कन्फर्म</button>';
+      } else {
+        quickStatusBtns = '<button class="btn-sm btn-warning" onclick="setOrderStatus(' + o.id + ', \'pending\')">↺ Pending करा</button>' +
+                          '<button class="btn-sm btn-danger" onclick="setOrderStatus(' + o.id + ', \'cancelled\')">❌ रद्द</button>';
+      }
+
+      return '<div class="order-card">' +
+        '<div class="order-top"><div class="order-name">👤 ' + escHtml(o.name) + '</div><span class="status-badge ' + st.cls + '">' + st.text + '</span></div>' +
+        '<div class="order-meta">📞 ' + escHtml(o.phone) + ' | 📦 ' + escHtml(o.pkg || 'कस्टम मेनू') + ' | 📍 ' + escHtml(o.place) + ' | 📅 ' + escHtml(o.date) + ' | 👥 ' + escHtml(o.guests) + '</div>' +
+        '<div class="order-items-box"><strong>मेनू:</strong> ' + escHtml(itemsStr) + (o.feedback && o.feedback !== '-' ? '<br><strong>सूचना:</strong> ' + escHtml(o.feedback) : '') + '</div>' +
+        '<div class="order-actions">' +
+          '<button class="btn-sm btn-edit" onclick="openOwnerEditOrderModal(' + o.id + ')">✏️ एडिट</button>' +
+          quickStatusBtns +
+          (cleanPhone.length === 10 ? '<a class="btn-sm btn-outline" href="tel:+91' + cleanPhone + '">📞 कॉल</a>' : '') +
+          (waLink ? '<a class="btn-sm btn-wa" href="' + waLink + '" target="_blank">💬 WhatsApp</a>' : '') +
+          '<button class="btn-sm btn-danger" onclick="deleteOrder(' + o.id + ')">🗑️ Delete</button>' +
+        '</div></div>';
+    }
+
+    function buildRecycleCard(o) {
+      const elapsedMs = Date.now() - (o.deletedAt || Date.now());
+      const daysLeft = Math.max(0, Math.ceil((THIRTY_DAYS_MS - elapsedMs) / (24 * 60 * 60 * 1000)));
+      const itemsStr = (o.items && o.items.length) ? o.items.join(", ") : (o.pkg || "-");
+      return '<div class="order-card deleted-card">' +
+        '<div class="order-top"><div class="order-name">👤 ' + escHtml(o.name) + '</div><span class="status-badge badge-deleted">⏳ ' + daysLeft + ' दिवस शिल्लक</span></div>' +
+        '<div class="order-meta">📞 ' + escHtml(o.phone) + ' | 📍 ' + escHtml(o.place) + ' | 📅 ' + escHtml(o.date) + ' | 👥 ' + escHtml(o.guests) + '</div>' +
+        '<div class="order-items-box"><strong>मेनू:</strong> ' + escHtml(itemsStr) + (o.feedback && o.feedback !== '-' ? '<br><strong>सूचना:</strong> ' + escHtml(o.feedback) : '') + '</div>' +
+        '<div class="order-actions">' +
+          '<button class="btn-sm btn-success" onclick="restoreFromRecycleBin(' + o.id + ')">♻️ रिस्टोअर करा</button>' +
+          '<button class="btn-sm btn-danger-solid" onclick="permanentDeleteOrder(' + o.id + ')">❌ कायमचे डिलीट करा</button>' +
+        '</div></div>';
+    }
+
+    function renderOverview() {
+      const validOrders = sanitizeOrdersList(orders);
+      const total = validOrders.length;
+      const completed = validOrders.filter(o => o.status === "completed").length;
+      const activePending = validOrders.filter(o => o.status === "pending" || o.status === "confirmed" || !o.status).length;
+      document.getElementById("statTotal").textContent = total;
+      document.getElementById("statComplete").textContent = completed;
+      document.getElementById("statPending").textContent = activePending;
+      document.getElementById("statReviews").textContent = reviews.length;
+
+      const compPct = total ? Math.round((completed / total) * 100) : 0;
+      const pendPct = total ? Math.round((activePending / total) * 100) : 0;
+      document.getElementById("lblBarTotal").textContent = total + " (100%)";
+      document.getElementById("lblBarComplete").textContent = completed + " (" + compPct + "%)";
+      document.getElementById("lblBarPending").textContent = activePending + " (" + pendPct + "%)";
+      document.getElementById("barTotal").style.width = total > 0 ? "100%" : "0%";
+      document.getElementById("barComplete").style.width = compPct + "%";
+      document.getElementById("barPending").style.width = pendPct + "%";
+
+      const counts = MARATHI_MONTHS.map(m => validOrders.filter(o => o.monthLabel === m).length);
+      const maxVal = Math.max(1, ...counts);
+      document.getElementById("monthlyChart").innerHTML = MARATHI_MONTHS.map((m, idx) => {
+        const val = counts[idx], heightPct = val === 0 ? 6 : Math.round((val / maxVal) * 100);
+        return '<div class="vbar-col"><div class="vbar-val">' + val + '</div><div class="vbar-stick" style="height:' + heightPct + '%; opacity:' + (val === 0 ? '0.25' : '1') + ';"></div><div class="vbar-month">' + m + '</div></div>';
+      }).join("");
+
+      const pendingList = validOrders.filter(o => o.status === "pending" || o.status === "confirmed" || !o.status).slice(0, 3);
+      document.getElementById("pendingPreviewList").innerHTML = pendingList.length ? pendingList.map(buildOrderCard).join("") : '<p style="color:var(--muted); font-size:0.86rem;">सध्या एकही सक्रिय Pending/Confirmed ऑर्डर नाही.</p>';
+    }
+
+    function renderOrdersList() {
+      purgeExpiredRecycleBin();
+      const q = (document.getElementById("orderSearchInput").value || "").trim().toLowerCase();
+      const bannerWrap = document.getElementById("recycleBannerWrap");
+
+      if (orderFilter === "recycle") {
+        const filteredBin = recycleBin.filter(o => !q || (o.name || "").toLowerCase().includes(q) || (o.phone || "").includes(q) || (o.place || "").toLowerCase().includes(q));
+        bannerWrap.innerHTML = '<div class="recycle-banner"><span>🗑️ डिलीट केलेल्या ऑर्डर्स येथे <strong>३० दिवसांसाठी</strong> सुरक्षित राहतात.</span>' +
+          (recycleBin.length ? '<button class="btn-sm btn-danger-solid" onclick="emptyRecycleBin()">🧹 सर्व रिकामे करा</button>' : '') + '</div>';
+        document.getElementById("ordersList").innerHTML = filteredBin.length ? filteredBin.map(buildRecycleCard).join("") : '<p style="color:var(--muted); font-size:0.86rem; text-align:center; padding:14px;">रिसायकल बिन रिकामा आहे.</p>';
+        return;
+      }
+
+      bannerWrap.innerHTML = "";
+      const filtered = sanitizeOrdersList(orders).filter(o => {
+        const st = o.status || "pending";
+        const matchStatus = orderFilter === "all" || st === orderFilter;
+        const matchQ = !q || (o.name || "").toLowerCase().includes(q) || (o.phone || "").includes(q) || (o.place || "").toLowerCase().includes(q);
+        return matchStatus && matchQ;
+      });
+      document.getElementById("ordersList").innerHTML = filtered.length ? filtered.map(buildOrderCard).join("") : '<p style="color:var(--muted); font-size:0.86rem; text-align:center; padding:14px;">कोणतीही ऑर्डर सापडली नाही.</p>';
+    }
+
+    async function deleteReview(id) {
+      reviews = loadStore("chintamani_reviews", DEFAULT_REVIEWS).filter(r => r.id !== id);
+      saveStore("chintamani_reviews", reviews);
+      notifyCustomerSite("reviews_updated");
+      pushCloud("/reviews/" + id + ".json", "DELETE");
+      renderOwnerReviews(); renderOverview();
+      showToast("🗑️ रिव्ह्यू डिलीट केला.");
+    }
+
+    function renderOwnerReviews() {
+      const rawRevs = loadStore("chintamani_reviews", DEFAULT_REVIEWS);
+      reviews = Array.isArray(rawRevs) ? rawRevs.filter(r => r && typeof r.name === "string" && r.name.trim() !== "") : DEFAULT_REVIEWS;
+      const count = reviews.length, avg = count ? (reviews.reduce((s, r) => s + (Number(r.rating) || 5), 0) / count).toFixed(1) : "0.0";
+      document.getElementById("ownerRevSummary").textContent = "सरासरी: " + avg + " ★ (" + count + ")";
+      document.getElementById("ownerReviewsList").innerHTML = count === 0
+        ? '<p style="color:var(--muted); font-size:0.86rem;">सध्या एकही रिव्ह्यू नाही.</p>'
+        : reviews.map(r => '<div class="review-card"><div class="review-head"><div><strong>' + escHtml(r.name) + '</strong> <span style="font-size:0.75rem; color:var(--muted);">(' + escHtml(r.event || "कार्यक्रम") + ')</span></div><button class="btn-sm btn-danger" onclick="deleteReview(' + r.id + ')">काढा</button></div><div class="review-stars">' + "★".repeat(Math.min(5, Math.max(1, Number(r.rating) || 5))) + "☆".repeat(5 - Math.min(5, Math.max(1, Number(r.rating) || 5))) + '</div><p style="font-size:0.86rem; margin-top:4px;">' + escHtml(r.comment || "") + '</p></div>').join("");
+    }
+
+    renderLogo();
+    renderQrPreview();
+    loadCustomerEditor();
+    syncFromSources(false, true);
+  </script>
+</body>
+</html>
